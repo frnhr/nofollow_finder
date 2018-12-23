@@ -5,7 +5,9 @@
 nofollow_finder {version}
 
 Usage:
-  nofollow_finder -i <input_csv> -d <domains> [-a | -f] [options]
+  nofollow_finder -d <domains> [options]
+  nofollow_finder [-i <input_csv>] -d <domains> [-o <out_file> [-a | -f]] \
+[options]
   nofollow_finder (-v | --version)
   nofollow_finder (-h | --help)
 
@@ -42,12 +44,10 @@ from nofollow_finder.output_csv import OutputCSV
 from nofollow_finder.parser import Parser
 from nofollow_finder.processor import Processor
 
-
 MAX_TIMEOUT = 30  # seconds
 DEFAULT_LOFG = 'nofollow_finder.log'
 VERSION = ('0', '0', '1')
 __version__ = '.'.join(VERSION)
-
 
 __doc__ = __doc__.format(
     version=__version__,
@@ -55,9 +55,7 @@ __doc__ = __doc__.format(
     default_log=DEFAULT_LOFG,
 )
 
-
 log = logging.getLogger(__name__)
-
 
 LOG_FORMAT = (
     '%(levelname)-8s  %(asctime)s  %(process)-5d  %(name)-26s  %(message)s')
@@ -121,6 +119,8 @@ def validate_overwrite(args_):
 
 def validate_input(args_):
     in_file = args_['--input']
+    if in_file is None:
+        return in_file
     exists = os.path.isfile(in_file)
     if not exists:
         raise docopt.DocoptExit(

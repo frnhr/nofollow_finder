@@ -10,7 +10,6 @@ import csv
 import collections
 import sys
 
-
 csv_row = collections.namedtuple('csv_row', 'url http_response nofollow count')
 
 

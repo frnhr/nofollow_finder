@@ -9,7 +9,7 @@ from __future__ import (
 import csv
 import logging
 import re
-
+import sys
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,11 @@ class InputCSV(object):
     def urls(self):
         line_number = 0
         found_one = False
-        with open(self.file_path) as fh:
+        try:
+            if self.file_path:
+                fh = open(self.file_path)
+            else:
+                fh = sys.stdin
             reader = csv.reader(fh)
             for line_number, row in enumerate(reader, start=1):
                 url = row[0]
@@ -33,6 +37,9 @@ class InputCSV(object):
                 else:
                     found_one = True
                     yield validated_url
+        finally:
+            if self.file_path:
+                fh.close()
         if not found_one:
             log.error('No URLs found in the first column of input file')
         if not line_number:

@@ -16,7 +16,6 @@ from pyquery import (
     PyQuery,
 )
 
-
 log = logging.getLogger(__name__)
 
 
