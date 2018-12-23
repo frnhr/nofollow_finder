@@ -6,11 +6,11 @@ from __future__ import (
 )
 
 import csv
+import collections
 import sys
-from collections import namedtuple
 
 
-csv_row = namedtuple('csv_row', 'url http_response nofollow count')
+csv_row = collections.namedtuple('csv_row', 'url http_response nofollow count')
 
 
 class OutputCSV(object):
