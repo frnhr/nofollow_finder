@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 from nofollow_finder.__main__ import run_from_cli
 

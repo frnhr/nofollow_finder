@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding=utf-8
+
 """
 nofollow_finder {version}
 
@@ -40,7 +43,7 @@ from nofollow_finder.parser import Parser
 from nofollow_finder.processor import Processor
 
 
-MAX_TIMEOUT = 60  # seconds
+MAX_TIMEOUT = 30  # seconds
 VERSION = ('0', '0', '1')
 __version__ = '.'.join(VERSION)
 

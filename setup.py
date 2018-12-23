@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 from setuptools import setup
 
@@ -17,7 +18,7 @@ setup(
     install_requires=[
         'docopt>=0.6.2,<0.7',
         'pyquery>=1.4.0,<1.5',
-        'subprocess32>=3.5.3,<4',
         'lxml>=4.2.5,<4.3',
+        'subprocess32>=3.5.3,<4',
     ],
 )
