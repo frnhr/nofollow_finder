@@ -41,7 +41,7 @@ class Downloader(object):
         log.debug('command: %s', cmd)
         returncode, out, err = command.run(cmd, timeout=self.timeout)
         if returncode:
-            log.info('curl returned error code: %d', returncode)
+            log.error('curl returned error code %d for %s', returncode, url)
             raise self.GetException()
         return out, err
 
