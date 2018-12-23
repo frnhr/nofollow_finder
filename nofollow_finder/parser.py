@@ -56,7 +56,10 @@ class Parser(object):
     @property
     def domains_pattern(self):
         domains_patterns = [
-            '({}{})'.format(self.subdomain_pattern, re.escape(domain))
+            '({}{})'.format(
+                self.subdomain_pattern,
+                re.escape(domain.lower()),
+            )
             for domain in self.domains
         ]
         pattern = '|'.join(domains_patterns)
@@ -79,7 +82,7 @@ class Parser(object):
                 yield a_node, domain, self._is_nofollow(a_node)
 
     def _matches_domain(self, a_node):
-        href = a_node.attrib['href']
+        href = a_node.attrib['href'].lower()
         match = self._re.match(href)
         if match:
             domain = match.group(1)
