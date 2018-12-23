@@ -46,15 +46,21 @@ generates a CSV report.
 
     The tool takes the next URL from the list in "1." and proceeds to "3.".
 
-## Requirements
-
-This tool has been tested under Python 2.7.15 on Mac Mojave and Ubuntu TODO.
-
-It should work on all POSIX systems.
-
 
 ## Setup
 
+### Requirements
+
+This tool has been tested under:
+
+Python:
+ * 2.7.15
+
+OS: 
+ * Mac 10.14.2 "Mojave"
+ * Ubuntu 16.04.4 LTS "Xenial Xerus"
+
+It should work on all POSIX systems.
 
 
 ### Create a virtual environment
@@ -67,36 +73,94 @@ Optional but recommended.
 multiple Python environments effectively.
 
 ```bash
-cd project_directory
+curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
 
-pyenv install 2.7.15  # if not present
+# if on a Mac, use ~/.bash_profile
+echo "" >> ~/.bashrc
+echo "# pyenv" >> ~/.bashrc
+echo "export PATH=\"$(echo ${HOME})/.pyenv/bin:$PATH\"" >> ~/.bashrc
+echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bashrc
 
+source ~/.bashrc
+
+pyenv install 2.7.15
 pyenv virtualenv 2.7.15 nofollow_finder
 
-pyenv local nofollow_finder  # optional
+mkdir -p src/nofollow_finder
+cd src/nofollow_finder
+pyenv local nofollow_finder
 ```
 
-Project directory can be a root directory where your CSV input scripts 
-live.
+You should see `(nofollow_finder) ` prepended to your usual shell prompt.
 
 Every time you "cd into" the project directory, the virtualenv will be 
-automatically activated.   
+automatically activated. When "cd out of" the directory, it will be 
+deactivated.
 
 To activate the virtualenv manually: `pyenv activate nofollow_finder`
 
 The name of the virtualenv does not have to match the name of this tool.
 
+It is possible to run `pyenv local nofollow_finder` in multiple directories
+in different locations, e.g. in:
+```
+/home/myname/src/nofollow_finder
+/home/myname/documents/seo_efforts
+```
 
-### Install
+Also note that it is not necessary to run the command in any 
+sub-directories, as they will "inherit" the configuration is present in 
+any parent directory. 
+
+
+#### Installation
+
+Get a GitHub personal token from [https://github.com/settings/tokens](https://github.com/settings/tokens).
+
+Then run:
 ```bash
-curl TODO
+export GH_USER="YOUR_USERNAME"
+curl -u"$GH_USER" -L -O https://github.com/frnhr/nofollow_finder/archive/0.0.1.tar.gz
 
-tar -xvzf TODO
+# paste your token
 
-cd 
+tar -xvzf 0.0.1.tar.gz
 
+cd nofollow_finder-0.0.1/ 
 pip install .
 ````
+
+
+#### Test
+
+Test that all is working well.
+
+```bash
+$ nofollow_finder -v
+nofollow_finder 0.0.1
+```
+
+Run the provided sample CSV, and expect output like below (trimmed for clarity).
+
+```bash
+$ nofollow_finder -d twitter.com,facebook.com -i SampleLinks.csv
+https://example.com/,200,No,0
+ERROR     ...  curl returned error code 6 for http://doesnotexist.fooo
+http://doesnotexist.fooo,0,Fail,0
+INFO      ...   https://en.wikinews.org/wiki/Main_Page...
+...
+INFO      ...   https://en.wikinews.org/wiki/Main_Page
+...
+https://en.wikinews.org/wiki/Main_Page,200,Yes,2
+ERROR     ...  HTTP status 503 for url http://changeset.hr/
+http://changeset.hr/,0,Fail,0
+ERROR     ...   unexpected error while downloading url http://google.com
+http://google.com,0,Fail,0
+ERROR     ...   No A nodes found on http://changeset.hr/misc/noancors.html
+http://changeset.hr/misc/noancors.html,200,No,0
+```
+
 
 ## CLI usage
 
