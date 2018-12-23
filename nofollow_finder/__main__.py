@@ -2,7 +2,7 @@
 nofollow_finder {version}
 
 Usage:
-  nofollow_finder -i <input_csv> -d <domains> [options]
+  nofollow_finder -i <input_csv> -d <domains> [-a | -f] [options]
   nofollow_finder (-v | --version)
   nofollow_finder (-h | --help)
 
@@ -10,6 +10,9 @@ Options:
   -i --input=<input_csv>  CSV file with URLs on the first column. Required.
   -d --domains=<domains>  List of domains, separated by commas. Required.
   -o --out=<out_file>     Output CSV file: "-"=stdout [default: out.csv]
+  -a --append             Append to existing CSV file.
+  -f --force              Overwrite existing CSV file.
+                          "-a" and "-f" are ignored when file does not exist.
   -l --log=<log_file>     Log file [default: nofollow_finder.log]
   -V --verbosity=<V>      Log verbosity: 0-4 [default: 3].
                           0=silent, 1=error, 2=warning, 3=info, 4=debug
@@ -26,6 +29,7 @@ from __future__ import (
 )
 
 import logging
+import os
 
 import docopt
 
@@ -103,7 +107,36 @@ def validate_timeout(args_):
     return timeout
 
 
-def main(in_file, domains, log_file, out_file, verbosity, redirect, timeout):
+def validate_overwrite(args_):
+    append = args_['--append']
+    force = args_['--force']
+    out_file = args_['--out']
+    is_stdout = out_file == '-'
+    exists = (not is_stdout) and os.path.isfile(out_file)
+    if exists and not append and not force:
+        raise docopt.DocoptExit(
+            'Output file already exists. Overwrite: "-f" or append: "-a"')
+    return not append
+
+
+def validate_input(args_):
+    in_file = args_['--input']
+    exists = os.path.isfile(in_file)
+    if not exists:
+        raise docopt.DocoptExit(
+            'Input file does not exist.')
+    return in_file
+
+
+def validate_output(args_):
+    out_file = args_['--out']
+    if out_file == '-':
+        out_file = None
+    return out_file
+
+
+def main(in_file, domains, log_file, out_file, overwrite, verbosity, redirect,
+         timeout):
     _configure_log(log_file, verbosity)
     log.debug('start')
     if verbosity == 4:
@@ -113,7 +146,7 @@ def main(in_file, domains, log_file, out_file, verbosity, redirect, timeout):
         log.error("Sample error message")
         log.critical("Sample critical message")
     input_csv = InputCSV(in_file)
-    output_csv = OutputCSV(out_file)
+    output_csv = OutputCSV(out_file, overwrite)
     downloader = Downloader(follow_redirects=redirect, timeout=timeout)
     parser = Parser(domains)
     processor = Processor(input_csv, downloader, parser, output_csv)
@@ -124,10 +157,11 @@ def main(in_file, domains, log_file, out_file, verbosity, redirect, timeout):
 def run_from_cli():
     args = docopt.docopt(__doc__, version=__doc__.strip().splitlines()[0])
     arguments_ = docopt.Dict({
-        'in_file': args['--input'],
+        'in_file': validate_input(args),
         'domains': validate_domains(args),
         'log_file': validate_log_file(args),
-        'out_file': args['--out'],
+        'out_file': validate_output(args),
+        'overwrite': validate_overwrite(args),
         'verbosity': validate_verbosity(args),
         'redirect': validate_redirect(args),
         'timeout': validate_timeout(args),

@@ -20,6 +20,8 @@ class InputCSV(object):
         self.file_path = file_path
 
     def urls(self):
+        line_number = 0
+        found_one = False
         with open(self.file_path) as fh:
             reader = csv.reader(fh)
             for line_number, row in enumerate(reader, start=1):
@@ -28,7 +30,12 @@ class InputCSV(object):
                 if not validated_url:
                     self.reject(line_number, url)
                 else:
+                    found_one = True
                     yield validated_url
+        if not found_one:
+            log.error('No URLs found in the first column of input file')
+        if not line_number:
+            log.error('Error parsing input file')
 
     @classmethod
     def validate(cls, url):
