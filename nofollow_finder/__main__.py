@@ -12,15 +12,15 @@ Usage:
 Options:
   -i --input=<input_csv>  CSV file with URLs on the first column. Required.
   -d --domains=<domains>  List of domains, separated by commas. Required.
-  -o --out=<out_file>     Output CSV file: "-"=stdout [default: out.csv]
+  -o --out=<out_file>     Output CSV file. Default: stdout.
   -a --append             Append to existing CSV file.
   -f --force              Overwrite existing CSV file.
                           "-a" and "-f" are ignored when file does not exist.
-  -l --log=<log_file>     Log file [default: nofollow_finder.log]
-  -V --verbosity=<V>      Log verbosity: 0-4 [default: 3].
+  -l --log=<log_file>     Log file. Default: stderr
+  -V --verbosity=<V>      Log verbosity: 0-4 [default: 3]
                           0=silent, 1=error, 2=warning, 3=info, 4=debug
-  -R --redirect=<R>       Follow HTTP redirects: 0,1 [default: 1]
-  -t --timeout=<T>        Timeout for HTTP traffic: 1-{MT}, 0=none [default: 7]
+  -L --nofollow           Do not follow HTTP redirects (301, 302, etc.).
+  -t --timeout=<T>        Timeout for HTTP traffic: 1-{mt}, 0=none [default: 7]
   -v --version            Show program name and version.
   -h --help               Show this help text and exit.
 """
@@ -44,13 +44,15 @@ from nofollow_finder.processor import Processor
 
 
 MAX_TIMEOUT = 30  # seconds
+DEFAULT_LOFG = 'nofollow_finder.log'
 VERSION = ('0', '0', '1')
 __version__ = '.'.join(VERSION)
 
 
 __doc__ = __doc__.format(
     version=__version__,
-    MT=MAX_TIMEOUT,
+    mt=MAX_TIMEOUT,
+    default_log=DEFAULT_LOFG,
 )
 
 
@@ -79,9 +81,7 @@ def validate_verbosity(args_):
 
 
 def validate_redirect(args_):
-    if args_['--redirect'] not in ('0', '1'):
-        raise docopt.DocoptExit('Redirect not one of: 0, 1')
-    return bool(int(args_['--redirect']))
+    return not args_['--nofollow']
 
 
 def validate_domains(args_):
@@ -90,10 +90,7 @@ def validate_domains(args_):
 
 
 def validate_log_file(args_):
-    log_file = args_['--log']
-    if log_file == '-':
-        log_file = None
-    return log_file
+    return args_['--log']
 
 
 def validate_timeout(args_):
@@ -114,7 +111,7 @@ def validate_overwrite(args_):
     append = args_['--append']
     force = args_['--force']
     out_file = args_['--out']
-    is_stdout = out_file == '-'
+    is_stdout = out_file is None
     exists = (not is_stdout) and os.path.isfile(out_file)
     if exists and not append and not force:
         raise docopt.DocoptExit(
@@ -133,8 +130,6 @@ def validate_input(args_):
 
 def validate_output(args_):
     out_file = args_['--out']
-    if out_file == '-':
-        out_file = None
     return out_file
 
 
