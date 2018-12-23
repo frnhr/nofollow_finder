@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+
+from setuptools import setup
+
+setup(
+    name='nofollow_finder',
+    description='Python command line tool that detects nofollow '
+                'links to specified web pages.',
+    version='0.1',
+    url='https://github.com/frnhr/nofollow_finder',
+    author='Fran Hrzenjak',
+    author_email='fran@changeset.hr',
+    scripts=['bin/nofollow_finder'],
+    packages=['nofollow_finder'],
+    license='MIT',
+    keywords='',
+    install_requires=[
+        'docopt>=0.6.2,<0.7',
+        'pyquery>=1.4.0,<1.5',
+        'subprocess32>=3.5.3,<4',
+        'lxml>=4.2.5,<4.3',
+    ],
+)
