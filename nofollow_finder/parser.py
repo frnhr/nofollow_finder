@@ -1,3 +1,4 @@
+# coding=utf-8
 from __future__ import (
     absolute_import,
     division,
@@ -7,9 +8,6 @@ from __future__ import (
 
 import logging
 import re
-from functools import (
-    partial,
-)
 
 from lxml.etree import (
     ParserError,
@@ -38,6 +36,16 @@ class Parser(object):
         ')'  # close the non-capturing group
         '$'
     )
+    subdomain_pattern = (
+        '(?:'  # open non-capture group "OUTER"
+        '(?:'  # open another non-capture group "LABELS"
+        '[^./]{1,63}'  # single label with up to 63 chars
+        '\.'  # a dot
+        ')'  # close non-capture group "LABELS"
+        '{0,2}'  # group "LABELS" can repeat 0 to 2 times
+        ')'  # close non-capture group "OUTER"
+        '?'  # make the whole "OUTER" group optional
+    )
 
     class ZeroANodes(Exception):
         """No A tags found"""
@@ -48,12 +56,11 @@ class Parser(object):
 
     @property
     def domains_pattern(self):
-        pattern = '|'.join(
-            map(
-                partial(unicode.format, '({})'),
-                map(re.escape, self.domains)
-            ),
-        )
+        domains_patterns = [
+            '({}{})'.format(self.subdomain_pattern, re.escape(domain))
+            for domain in self.domains
+        ]
+        pattern = '|'.join(domains_patterns)
         log.debug('domains pattern: %s', pattern)
         return pattern
 
@@ -82,7 +89,8 @@ class Parser(object):
             domain = None
         return domain
 
-    def _is_nofollow(self, a_node):
+    @staticmethod
+    def _is_nofollow(a_node):
         match = ''.join([
             a_node.attrib.get('rel', ''),
             a_node.attrib.get('Rel', ''),
