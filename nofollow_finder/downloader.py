@@ -40,7 +40,11 @@ class Downloader(object):
             url=url,
         )
         log.debug('command: %s', cmd)
-        returncode, out, err = command.run(cmd, timeout=self.timeout)
+        try:
+            returncode, out, err = command.run(cmd, timeout=self.timeout)
+        except command.Timeout:
+            log.error('curl timed out for %s', url)
+            raise self.GetException()
         if returncode:
             log.error('curl returned error code %d for %s', returncode, url)
             raise self.GetException()

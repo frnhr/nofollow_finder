@@ -21,6 +21,10 @@ else:
 log = logging.getLogger(__name__)
 
 
+class Timeout(Exception):
+    """Command has timed out"""
+
+
 class Command(object):
     def __init__(self, cmd):
         self.cmd = cmd
@@ -48,9 +52,10 @@ class Command(object):
         thread.start()
         thread.join(timeout)
         if thread.is_alive():
-            log.warning('Terminating process')
+            log.debug('Terminating process')
             self.process.terminate()
             thread.join()
+            raise Timeout()
             results = (1, '', '')
         return results  # (returncode, out, err)
 
