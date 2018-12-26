@@ -21,14 +21,8 @@ else:
 log = logging.getLogger(__name__)
 
 
-def check_pid(pid):
-    """ Check For the existence of a unix pid. """
-    try:
-        os.kill(pid, 0)
-    except OSError:
-        return False
-    else:
-        return True
+class Timeout(Exception):
+    """Command has timed out"""
 
 
 class Command(object):
@@ -58,9 +52,10 @@ class Command(object):
         thread.start()
         thread.join(timeout)
         if thread.is_alive():
-            log.warning('Terminating process')
+            log.debug('Terminating process')
             self.process.terminate()
             thread.join()
+            raise Timeout()
             results = (1, '', '')
         return results  # (returncode, out, err)
 
