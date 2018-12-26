@@ -18,6 +18,9 @@ Options:
   -a --append             Append to existing CSV file.
   -f --force              Overwrite existing CSV file.
                           "-a" and "-f" are ignored when file does not exist.
+  -e --header             Force header row creation in CSV output.
+  -n --noheader           Prevent header row creation in CSV output.
+                          Default: add headers only when creating a new file.
   -l --log=<log_file>     Log file. Default: stderr
   -V --verbosity=<V>      Log verbosity: 0-4 [default: 3]
                           0=silent, 1=error, 2=warning, 3=info, 4=debug
@@ -72,6 +75,20 @@ def _configure_log(log_file, verbosity):
     logging.basicConfig(filename=log_file, level=level, format=LOG_FORMAT)
 
 
+def _output_args(args_):
+    append = args_['--append']
+    force = args_['--force']
+    out_file = args_['--out']
+    is_stdout = out_file is None
+    exists = (not is_stdout) and os.path.isfile(out_file)
+    return(
+        exists,  # it is a file and it already exists (False for strout)
+        is_stdout,  # it is stdout and not a file
+        append,  # provided `-a` or `--append`
+        force,  # provided `-f` or `--force`
+    )
+
+
 def validate_verbosity(args_):
     if args_['--verbosity'] not in ('0', '1', '2', '3', '4'):
         raise docopt.DocoptExit('Verbosity not one of: 0, 1, 2, 3, 4')
@@ -106,11 +123,7 @@ def validate_timeout(args_):
 
 
 def validate_overwrite(args_):
-    append = args_['--append']
-    force = args_['--force']
-    out_file = args_['--out']
-    is_stdout = out_file is None
-    exists = (not is_stdout) and os.path.isfile(out_file)
+    exists, is_stdout, append, force = _output_args(args_)
     if exists and not append and not force:
         raise docopt.DocoptExit(
             'Output file already exists. Overwrite: "-f" or append: "-a"')
@@ -133,8 +146,22 @@ def validate_output(args_):
     return out_file
 
 
-def main(in_file, domains, log_file, out_file, overwrite, verbosity, redirect,
-         timeout):
+def validate_header(args_):
+    if args_['--header'] and args_['--noheader']:
+        raise docopt.DocoptExit('Specify either -e or -n but not both.')
+    exists, is_stdout, append, force = _output_args(args_)
+    is_file = not is_stdout
+    actually_appending = exists and append
+    header = is_file and not actually_appending
+    if args_['--header']:
+        header = True
+    if args_['--noheader']:
+        header = False
+    return header
+
+
+def main(in_file, domains, log_file, out_file, overwrite, header, verbosity,
+         redirect, timeout):
     _configure_log(log_file, verbosity)
     log.debug('start')
     if verbosity == 4:
@@ -144,7 +171,7 @@ def main(in_file, domains, log_file, out_file, overwrite, verbosity, redirect,
         log.error("Sample error message")
         log.critical("Sample critical message")
     input_csv = InputCSV(in_file)
-    output_csv = OutputCSV(out_file, overwrite)
+    output_csv = OutputCSV(out_file, overwrite, header)
     downloader = Downloader(follow_redirects=redirect, timeout=timeout)
     parser = Parser(domains)
     processor = Processor(input_csv, downloader, parser, output_csv)
@@ -163,6 +190,7 @@ def run_from_cli():
         'verbosity': validate_verbosity(args),
         'redirect': validate_redirect(args),
         'timeout': validate_timeout(args),
+        'header': validate_header(args),
     })
     main(**arguments_)
 

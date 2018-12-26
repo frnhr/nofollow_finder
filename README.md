@@ -264,3 +264,15 @@ nofollow_filter -d TWITTER.com
 nofollow_filter -d Twitter.COM
 nofollow_filter -d Twitter.coM
 ```
+
+
+### Header row in CSV output
+
+Script provides `--header` and `--noheader` options to force or prevent 
+the header row on the output.
+
+Default behaviour (when neither option is specified) is to create the header
+row when creating a new file. Default for stdout is to skip the header.
+
+This also means that when using `--append` (or `-a`), the tool will create 
+header only if the file does not exist.
