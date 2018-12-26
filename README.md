@@ -1,4 +1,4 @@
-# nofollow_finder 1.0.0
+# nofollow_finder 1.1.0
 
 A tool that finds links with rel="nofollow" attribute on the web and 
 generates a CSV report.
@@ -121,13 +121,13 @@ Get a GitHub personal token from [https://github.com/settings/tokens](https://gi
 Then run:
 ```bash
 export GH_USER="YOUR_USERNAME"
-curl -u"$GH_USER" -L -O https://github.com/frnhr/nofollow_finder/archive/1.0.0.tar.gz
+curl -u"$GH_USER" -L -O https://github.com/frnhr/nofollow_finder/archive/1.1.0.tar.gz
 
 # paste your token
 
-tar -xvzf 1.0.0.tar.gz
+tar -xvzf 1.1.0.tar.gz
 
-cd nofollow_finder-1.0.0/ 
+cd nofollow_finder-1.1.0/ 
 pip install .
 ````
 
@@ -138,7 +138,7 @@ Test that all is working well.
 
 ```bash
 $ nofollow_finder -v
-nofollow_finder 1.0.0
+nofollow_finder 1.1.0
 ```
 
 Run the provided sample CSV, and expect output like below (trimmed for clarity).
