@@ -49,7 +49,7 @@ from nofollow_finder.processor import Processor
 
 MAX_TIMEOUT = 30  # seconds
 DEFAULT_LOFG = 'nofollow_finder.log'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 VERSION = tuple(__version__.split('.'))
 
 __doc__ = __doc__.format(
