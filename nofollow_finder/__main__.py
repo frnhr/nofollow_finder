@@ -25,7 +25,7 @@ Options:
   -V --verbosity=<V>      Log verbosity: 0-4 [default: 3]
                           0=silent, 1=error, 2=warning, 3=info, 4=debug
   -L --nofollow           Do not follow HTTP redirects (301, 302, etc.).
-  -t --timeout=<T>        Timeout for HTTP traffic: 1-{mt}, 0=none [default: 7]
+  -t --timeout=<T>        Timeout for HTTP traffic: 1-{m}, 0=none [default: 60]
   -v --version            Show program name and version.
   -h --help               Show this help text and exit.
 """
@@ -47,14 +47,16 @@ from nofollow_finder.output_csv import OutputCSV
 from nofollow_finder.parser import Parser
 from nofollow_finder.processor import Processor
 
-MAX_TIMEOUT = 30  # seconds
+_minutes_ = 60
+
+MAX_TIMEOUT = 5 * _minutes_
 DEFAULT_LOFG = 'nofollow_finder.log'
 __version__ = '1.1.0'
 VERSION = tuple(__version__.split('.'))
 
 __doc__ = __doc__.format(
     version=__version__,
-    mt=MAX_TIMEOUT,
+    m=MAX_TIMEOUT,
     default_log=DEFAULT_LOFG,
 )
 
@@ -116,7 +118,7 @@ def validate_timeout(args_):
         raise docopt.DocoptExit('Timeout has to be a number.')
     if timeout < 0:
         raise docopt.DocoptExit('Timeout has to be 0 or greater.')
-    if timeout >= MAX_TIMEOUT:
+    if timeout > MAX_TIMEOUT:
         raise docopt.DocoptExit(
             'Timeout has to be {} or less.'.format(MAX_TIMEOUT))
     return timeout
