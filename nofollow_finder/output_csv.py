@@ -38,3 +38,4 @@ class OutputCSV(object):
     def write(self, data):
         row = csv_row(**data)
         self.writer.writerow(row)
+        self.fh.flush()
