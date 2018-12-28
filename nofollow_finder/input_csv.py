@@ -30,7 +30,8 @@ class InputCSV(object):
                 fh = sys.stdin
             reader = csv.reader(fh)
             for line_number, row in enumerate(reader, start=1):
-                url = row[0]
+                url = row[0].decode("utf-8-sig")
+                url = url.strip()
                 validated_url = self.validate(url)
                 if not validated_url:
                     self.reject(line_number, url)
@@ -55,5 +56,5 @@ class InputCSV(object):
     @staticmethod
     def reject(line_number, url):
         log.warning(
-            'input on line %d does not look like a URL, skipping: %s',
-            line_number, url)
+            'input on line %d does not look like a URL, skipping: "%s"',
+            line_number, url.decode('utf-8'))
