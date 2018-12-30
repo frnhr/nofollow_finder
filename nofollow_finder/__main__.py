@@ -8,6 +8,7 @@ Usage:
   nofollow_finder -d <domains> [options]
   nofollow_finder [-i <input_csv>] -d <domains> [-o <out_file> [-a | -f]] \
 [options]
+  nofollow_finder test
   nofollow_finder (-v | --version)
   nofollow_finder (-h | --help)
 
@@ -51,7 +52,7 @@ _minutes_ = 60
 
 MAX_TIMEOUT = 5 * _minutes_
 DEFAULT_LOFG = 'nofollow_finder.log'
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 VERSION = tuple(__version__.split('.'))
 
 __doc__ = __doc__.format(
@@ -173,7 +174,7 @@ def main(in_file, domains, log_file, out_file, overwrite, header, verbosity,
         log.error("Sample error message")
         log.critical("Sample critical message")
     input_csv = InputCSV(in_file)
-    output_csv = OutputCSV(out_file, overwrite, header)
+    output_csv = OutputCSV(out_file, domains, overwrite, header)
     downloader = Downloader(follow_redirects=redirect, timeout=timeout)
     parser = Parser(domains)
     processor = Processor(input_csv, downloader, parser, output_csv)
@@ -183,6 +184,12 @@ def main(in_file, domains, log_file, out_file, overwrite, header, verbosity,
 
 def run_from_cli():
     args = docopt.docopt(__doc__, version=__doc__.strip().splitlines()[0])
+    if args['test']:
+        import unittest
+        path = os.path.join(os.path.dirname(__file__), 'tests')
+        suite = unittest.TestLoader().discover(path)
+        runner = unittest.TextTestRunner()
+        return runner.run(suite)
     arguments_ = docopt.Dict({
         'in_file': validate_input(args),
         'domains': validate_domains(args),

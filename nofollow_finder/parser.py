@@ -56,7 +56,7 @@ class Parser(object):
     @property
     def domains_pattern(self):
         domains_patterns = [
-            '({}{})'.format(
+            '(?:{}({}))'.format(
                 self.subdomain_pattern,
                 re.escape(domain.lower()),
             )
@@ -80,12 +80,13 @@ class Parser(object):
             domain = self._matches_domain(a_node)
             if domain:
                 yield a_node, domain, self._is_nofollow(a_node)
+        log.debug('no more a nodes')
 
     def _matches_domain(self, a_node):
         href = a_node.attrib['href'].lower()
         match = self._re.match(href)
         if match:
-            domain = match.group(1)
+            domain = filter(None, match.groups())[1]
             log.debug('match: %s', href)
         else:
             domain = None
@@ -104,11 +105,12 @@ class Parser(object):
         try:
             d = PyQuery(html)  # "d" like "$" (dollar sign, jQuery!!)
         except ParserError:
-            log.error('')
+            log.error('Cannot parse HTML')
             raise StopIteration()
         found_one = False
         for a in d(self.a_selector):
             found_one = True
+            log.debug('Found a node with href: %s', a.attrib.get('href'))
             yield a
         if not found_one:
             raise self.ZeroANodes()

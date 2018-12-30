@@ -7,7 +7,6 @@ from __future__ import (
 )
 
 import logging
-import re
 
 from nofollow_finder import command
 
@@ -16,7 +15,6 @@ log = logging.getLogger(__name__)
 
 
 class Downloader(object):
-    start_line_pattern = re.compile(r'^HTTP[^ ]+ ([0-9]{3})[^0-9]+$')
 
     class GetException(Exception):
         """GET request failed"""

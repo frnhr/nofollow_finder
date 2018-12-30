@@ -7,7 +7,7 @@ setup(
     name='nofollow_finder',
     description='Python command line tool that detects nofollow '
                 'links to specified web pages.',
-    version='1.1.1',
+    version='1.2.0',
     url='https://github.com/frnhr/nofollow_finder',
     author='Fran Hrzenjak',
     author_email='fran@changeset.hr',
@@ -21,4 +21,9 @@ setup(
         'lxml>=4.2.5,<4.3',
         'subprocess32>=3.5.3,<4',
     ],
+    extras_require={
+        'dev': [
+            'mock>=2.0.0,<3',
+        ],
+    },
 )
