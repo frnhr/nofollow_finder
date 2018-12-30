@@ -313,7 +313,7 @@ To check that results in the output are accurate, follow these steps:
    ```
    This is an example for two domains. Edit as needed.
 5. Interpret the result:
-   ```javascript
+   ```
    [
      0: NodeList(4) [a, a, a, a]
      1: NodeList(4) [a, a, a, a]
