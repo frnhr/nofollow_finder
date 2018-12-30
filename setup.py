@@ -21,4 +21,9 @@ setup(
         'lxml>=4.2.5,<4.3',
         'subprocess32>=3.5.3,<4',
     ],
+    extras_require={
+        'dev': [
+            'mock>=2.0.0,<3',
+        ],
+    },
 )

@@ -8,6 +8,7 @@ Usage:
   nofollow_finder -d <domains> [options]
   nofollow_finder [-i <input_csv>] -d <domains> [-o <out_file> [-a | -f]] \
 [options]
+  nofollow_finder test
   nofollow_finder (-v | --version)
   nofollow_finder (-h | --help)
 
@@ -173,7 +174,7 @@ def main(in_file, domains, log_file, out_file, overwrite, header, verbosity,
         log.error("Sample error message")
         log.critical("Sample critical message")
     input_csv = InputCSV(in_file)
-    output_csv = OutputCSV(out_file, overwrite, header)
+    output_csv = OutputCSV(out_file, domains, overwrite, header)
     downloader = Downloader(follow_redirects=redirect, timeout=timeout)
     parser = Parser(domains)
     processor = Processor(input_csv, downloader, parser, output_csv)
@@ -183,6 +184,12 @@ def main(in_file, domains, log_file, out_file, overwrite, header, verbosity,
 
 def run_from_cli():
     args = docopt.docopt(__doc__, version=__doc__.strip().splitlines()[0])
+    if args['test']:
+        import unittest
+        path = os.path.join(os.path.dirname(__file__), 'tests')
+        suite = unittest.TestLoader().discover(path)
+        runner = unittest.TextTestRunner(verbosity=validate_verbosity(args))
+        return runner.run(suite)
     arguments_ = docopt.Dict({
         'in_file': validate_input(args),
         'domains': validate_domains(args),
