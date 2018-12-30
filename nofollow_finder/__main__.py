@@ -188,7 +188,7 @@ def run_from_cli():
         import unittest
         path = os.path.join(os.path.dirname(__file__), 'tests')
         suite = unittest.TestLoader().discover(path)
-        runner = unittest.TextTestRunner(verbosity=validate_verbosity(args))
+        runner = unittest.TextTestRunner()
         return runner.run(suite)
     arguments_ = docopt.Dict({
         'in_file': validate_input(args),
