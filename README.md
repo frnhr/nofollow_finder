@@ -329,3 +329,8 @@ To check that results in the output are accurate, follow these steps:
     * none of which have `nofollow` (row 4)
     * ... so the result columns for this domain should be `follow` and `2`
   
+##### Pitfall!
+
+Be careful with the JS commands above, as they will also match other domains
+that contain the exact same string of characters, e.g: 
+`fakefacebook.com` or `facebook.com.cn`!
