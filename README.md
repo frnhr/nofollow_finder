@@ -110,8 +110,8 @@ in different locations, e.g. in:
 ```
 
 Also note that it is not necessary to run the command in any 
-sub-directories, as they will "inherit" the configuration is present in 
-any parent directory. 
+sub-directories, as they will "inherit" the configuration if present in 
+any ancestor directory. 
 
 
 #### Installation
@@ -140,6 +140,18 @@ Test that all is working well.
 $ nofollow_finder -v
 nofollow_finder 1.1.1
 ```
+
+Run unit tests:
+
+```bash
+$ nofollow_finder test
+...................
+----------------------------------------------------------------------
+Ran 19 tests in 0.573s
+
+OK
+```
+
 
 Run the provided sample CSV, and expect output like below (trimmed for clarity).
 
@@ -276,3 +288,44 @@ row when creating a new file. Default for stdout is to skip the header.
 
 This also means that when using `--append` (or `-a`), the tool will create 
 header only if the file does not exist.
+
+
+### Checking manually with a browser
+
+To check that results in the output are accurate, follow these steps:
+
+1. Disable JavaScript in your browser
+    * Links can be added or removed by JS
+        * that would probably be a bad practice from the SEO standpoint of the 
+          site in question 
+2. Open a URL in the browser
+3. Open JS console
+    * `Ctrl + Alt + i` or `Cmd + Alt + i` 
+    * or right-click anywhere and `Inspect element` and switch to `Console` tab
+4. Paste this in:
+   ```javascript
+   [
+     document.querySelectorAll('a[href*="twitter.com"]'), 
+     document.querySelectorAll('a[href*="twitter.com"][rel="nofollow"]'),
+     document.querySelectorAll('a[href*="facebook.club"]'), 
+     document.querySelectorAll('a[href*="facebook.club"][rel="nofollow"]'),
+   ]
+   ```
+   This is an example for two domains. Edit as needed.
+5. Interpret the result:
+   ```javascript
+   [
+     0: NodeList(4) [a, a, a, a]
+     1: NodeList(4) [a, a, a, a]
+     2: NodeList(2) [a, a]
+     3: NodeList []
+   ]
+   ```
+   Interpretation:
+    * 4 links to `twitter.com` (row 1)
+    * 4 of which have `nofollow` (row 2)
+    * ... so the result columns for this domain should be `nofollow` and `4`
+    * 2 links to `facebook.com` (row 3)
+    * none of which have `nofollow` (row 4)
+    * ... so the result columns for this domain should be `follow` and `2`
+  
