@@ -52,7 +52,7 @@ _minutes_ = 60
 
 MAX_TIMEOUT = 5 * _minutes_
 DEFAULT_LOFG = 'nofollow_finder.log'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 VERSION = tuple(__version__.split('.'))
 
 __doc__ = __doc__.format(
