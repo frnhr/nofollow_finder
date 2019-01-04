@@ -103,7 +103,8 @@ class Parser(object):
 
     def _a_nodes(self, html):
         try:
-            d = PyQuery(html)  # "d" like "$" (dollar sign, jQuery!!)
+            # "d" like "$" (dollar sign, jQuery!!)
+            d = PyQuery(html.encode('utf-8'))
         except ParserError:
             log.error('Cannot parse HTML')
             raise StopIteration()
