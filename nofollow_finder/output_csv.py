@@ -56,5 +56,6 @@ class OutputCSV(object):
 
     def write(self, data):
         row = self.csv_row(**data)
+        row = map(lambda u: u.encode('utf-8'), map(unicode, row))
         self.writer.writerow(row)
         self.fh.flush()
