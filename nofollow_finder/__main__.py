@@ -8,17 +8,23 @@ Usage:
   nofollow_finder -d <domains> [options]
   nofollow_finder [-i <input_csv>] -d <domains> [-o <out_file> [-a | -f]] \
 [options]
+  nofollow_finder --google [-c <count>] [options]
   nofollow_finder test
   nofollow_finder (-v | --version)
   nofollow_finder (-h | --help)
 
 Options:
-  -i --input=<input_csv>  CSV file with URLs on the first column. Required.
+  -i --input=<input_csv>  CSV file with URLs or Google query terms on
+                          the first column. Required.
   -d --domains=<domains>  List of domains, separated by commas. Required.
   -o --out=<out_file>     Output CSV file. Default: stdout.
   -a --append             Append to existing CSV file.
   -f --force              Overwrite existing CSV file.
                           "-a" and "-f" are ignored when file does not exist.
+  -g --google             Run in "Google" mode. First column in the CSV input
+                          file will be treated as query terms.
+  -c --count=<count>      Each term will be searched for on Google, and top
+                          <count> results will be processed. [default: 100]
   -e --header             Force header row creation in CSV output.
   -n --noheader           Prevent header row creation in CSV output.
                           Default: add headers only when creating a new file.
