@@ -20,6 +20,7 @@ setup(
         'pyquery>=1.4.0,<1.5',
         'lxml>=4.2.5,<4.3',
         'subprocess32>=3.5.3,<4',
+        'google-api-python-client>=1.7.8,<1.8',
     ],
     extras_require={
         'dev': [
