@@ -184,7 +184,7 @@ def main(in_file, domains, log_file, out_file, overwrite, header, verbosity,
 
 def run_from_cli():
     args = docopt.docopt(__doc__, version=__doc__.strip().splitlines()[0])
-    if args['test']:
+    if args['test']:  # pragma no cover
         import unittest
         path = os.path.join(os.path.dirname(__file__), 'tests')
         suite = unittest.TestLoader().discover(path)
@@ -204,5 +204,5 @@ def run_from_cli():
     main(**arguments_)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma no cover
     run_from_cli()
