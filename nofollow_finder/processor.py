@@ -25,6 +25,7 @@ class UrlData(dict):
 
     def __init__(self, domains, **kwargs):
         self.domains = domains
+        self._data_keys = kwargs.keys()
         for domain in domains:
             self[domain] = STATUS_NOT_FOUND
             self[self._count_key(domain)] = 0
@@ -70,8 +71,8 @@ class UrlData(dict):
     @property
     def data(self):
         value = {
-            'url': self['url'],
-            'http_response': self['http_response']
+            key: self[key]
+            for key in self._data_keys
         }
         for i, domain in enumerate(self.domains):
             value['domain_{}'.format(i)] = self[domain]
@@ -80,7 +81,6 @@ class UrlData(dict):
 
 
 class Processor(object):
-
     def __init__(self, input_csv, downloader, parser, output_csv):
         self.input_csv = input_csv
         self.downloader = downloader
@@ -91,11 +91,11 @@ class Processor(object):
 
     def process(self):
         log.debug('processing')
-        urls = self.input_csv.urls()
+        links = self.input_csv.links()
         self.output_csv.open()
         try:
-            for url in urls:
-                url_data = self._process_url(url)
+            for link in links:
+                url_data = self._process_link(link)
                 self.output_csv.write(url_data)
         except KeyboardInterrupt:
             log.warning('interrupt received, stopping')
@@ -103,14 +103,17 @@ class Processor(object):
         finally:
             self.output_csv.close()
 
-    def _process_url(self, url):
-        log.debug('url %s', url)
-        url_data = UrlData(
+    def make_url_data(self, link):
+        return UrlData(
             domains=self.domains,
-            url=url,
+            url=link['url'],
             http_response=0,
         )
 
+    def _process_link(self, link):
+        url = link['url']
+        log.debug('url %s', url)
+        url_data = self.make_url_data(link)
         html = ''
         # noinspection PyBroadException
         try:

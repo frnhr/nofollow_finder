@@ -18,6 +18,8 @@ class CLITests(unittest.TestCase):
             'redirect': True,
             'timeout': 60,
             'verbosity': 3,
+            'mode': None,
+            'settings_file': False,
         }
 
     @mock.patch('nofollow_finder.__main__.main')
@@ -291,7 +293,7 @@ class TestMain(unittest.TestCase):
         main.main(
             'in_file.csv', ['example.com'], 'log_file.log', 'out_file.csv',
             overwrite=True, header=False, verbosity=3, redirect=True,
-            timeout=2,
+            timeout=2, settings_file=False, mode=False,
         )
         p_input.assert_called_once_with('in_file.csv')
         p_output.assert_called_once_with(
@@ -320,7 +322,7 @@ class TestMain(unittest.TestCase):
         main.main(
             'in_file.csv', ['example.com'], 'log_file.log', 'out_file.csv',
             overwrite=True, header=False, verbosity=4, redirect=True,
-            timeout=2,
+            timeout=2, mode=None, settings_file=False,
         )
         p_input.assert_called_once_with('in_file.csv')
         p_output.assert_called_once_with(

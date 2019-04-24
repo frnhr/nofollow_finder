@@ -8,7 +8,8 @@ Usage:
   nofollow_finder -d <domains> [options]
   nofollow_finder [-i <input_csv>] -d <domains> [-o <out_file> [-a | -f]] \
 [options]
-  nofollow_finder --google [-c <count>] [options]
+  nofollow_finder --google [-c <count>] [-i <input_csv>] -d <domains> \
+[-o <out_file> [-a | -f]] [options]
   nofollow_finder test
   nofollow_finder (-v | --version)
   nofollow_finder (-h | --help)
@@ -16,6 +17,8 @@ Usage:
 Options:
   -i --input=<input_csv>  CSV file with URLs or Google query terms on
                           the first column. Required.
+                          `+` has a special meaning, standing in for hardcoded
+                          defaults.
   -d --domains=<domains>  List of domains, separated by commas. Required.
   -o --out=<out_file>     Output CSV file. Default: stdout.
   -a --append             Append to existing CSV file.
@@ -24,11 +27,15 @@ Options:
   -g --google             Run in "Google" mode. First column in the CSV input
                           file will be treated as query terms.
   -c --count=<count>      Each term will be searched for on Google, and top
-                          <count> results will be processed. [default: 100]
+                          <count> results will be processed. [default: {COUNT}]
   -e --header             Force header row creation in CSV output.
   -n --noheader           Prevent header row creation in CSV output.
                           Default: add headers only when creating a new file.
   -l --log=<log_file>     Log file. Default: stderr
+  -s --settings=<settings_file>
+                          Path to the settings file. Can be a list of \
+comma-separated paths. First one that exists will be used. \
+[default: .nofollowfinderrc,~/.nofollowfinderrc]
   -V --verbosity=<V>      Log verbosity: 0-4 [default: 3]
                           0=silent, 1=error, 2=warning, 3=info, 4=debug
   -L --nofollow           Do not follow HTTP redirects (301, 302, etc.).
@@ -50,9 +57,15 @@ import docopt
 
 from nofollow_finder.downloader import Downloader
 from nofollow_finder.input_csv import InputCSV
+from nofollow_finder.mode_google import (
+    GoogleInputCSV,
+    GoogleOutputCSV,
+    GoogleProcessor,
+)
 from nofollow_finder.output_csv import OutputCSV
 from nofollow_finder.parser import Parser
 from nofollow_finder.processor import Processor
+from nofollow_finder.settings import settings
 
 _minutes_ = 60
 
@@ -60,17 +73,19 @@ MAX_TIMEOUT = 5 * _minutes_
 DEFAULT_LOFG = 'nofollow_finder.log'
 __version__ = '1.2.2'
 VERSION = tuple(__version__.split('.'))
+DEFAULT_COUNT = 12
 
 __doc__ = __doc__.format(
     version=__version__,
     m=MAX_TIMEOUT,
     default_log=DEFAULT_LOFG,
+    COUNT=DEFAULT_COUNT,
 )
 
 log = logging.getLogger(__name__)
 
 LOG_FORMAT = (
-    '%(levelname)-8s  %(asctime)s  %(process)-5d  %(name)-26s  %(message)s')
+    '%(levelname)-8s  %(asctime)s  %(process)-5d  %(name)-43s  %(message)s')
 
 
 def _configure_log(log_file, verbosity):
@@ -102,6 +117,10 @@ def validate_verbosity(args_):
     if args_['--verbosity'] not in ('0', '1', '2', '3', '4'):
         raise docopt.DocoptExit('Verbosity not one of: 0, 1, 2, 3, 4')
     return int(args_['--verbosity'])
+
+
+def validate_settings(args_):
+    return args_['--settings']
 
 
 def validate_redirect(args_):
@@ -143,6 +162,8 @@ def validate_input(args_):
     in_file = args_['--input']
     if in_file is None:
         return in_file
+    if in_file == '+' and validate_mode(args_) == 'google':
+        return in_file
     exists = os.path.isfile(in_file)
     if not exists:
         raise docopt.DocoptExit(
@@ -169,8 +190,22 @@ def validate_header(args_):
     return header
 
 
+def validate_mode(args_):
+    if args_['--google']:
+        return 'google'
+    return None
+
+
+def validate_kwargs(args_):
+    if validate_mode(args_) == 'google':
+        return {
+            'count': int(args_['--count'] or DEFAULT_COUNT),
+        }
+    return {}
+
+
 def main(in_file, domains, log_file, out_file, overwrite, header, verbosity,
-         redirect, timeout):
+         redirect, timeout, settings_file, mode, **kwargs):
     _configure_log(log_file, verbosity)
     log.debug('start')
     if verbosity == 4:
@@ -179,11 +214,18 @@ def main(in_file, domains, log_file, out_file, overwrite, header, verbosity,
         log.warning("Sample warning message")
         log.error("Sample error message")
         log.critical("Sample critical message")
-    input_csv = InputCSV(in_file)
-    output_csv = OutputCSV(out_file, domains, overwrite, header)
+    settings.load(settings_file)
+
     downloader = Downloader(follow_redirects=redirect, timeout=timeout)
     parser = Parser(domains)
-    processor = Processor(input_csv, downloader, parser, output_csv)
+    if mode == 'google':
+        input_csv = GoogleInputCSV(in_file, kwargs['count'])
+        output_csv = GoogleOutputCSV(out_file, domains, overwrite, header)
+        processor = GoogleProcessor(input_csv, downloader, parser, output_csv)
+    else:
+        input_csv = InputCSV(in_file)
+        output_csv = OutputCSV(out_file, domains, overwrite, header)
+        processor = Processor(input_csv, downloader, parser, output_csv)
     processor.process()
     log.debug('done')
 
@@ -206,7 +248,10 @@ def run_from_cli():
         'redirect': validate_redirect(args),
         'timeout': validate_timeout(args),
         'header': validate_header(args),
+        'settings_file': validate_settings(args),
+        'mode': validate_mode(args),
     })
+    arguments_.update(**validate_kwargs(args))
     main(**arguments_)
 
 
