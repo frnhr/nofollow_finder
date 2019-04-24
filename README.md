@@ -1,4 +1,4 @@
-# nofollow_finder 1.2.2
+# nofollow_finder 1.3.0
 
 A tool that finds links with rel="nofollow" attribute on the web and 
 generates a CSV report.
@@ -132,6 +132,45 @@ pip install .
 ````
 
 
+#### Configuration file
+
+Currently configuration is only used in "Google" mode (see below).
+
+Format of the configuration file is compatible with settings of variables in 
+Bash, e.g: `SOME_CONF_KEY="very important value"`  
+
+Any lines starting with `#` will be ignored as comments.
+
+##### Location
+
+By default, the tool will look for configuration file in these two locations:
+
+ * `.nofollowfinderrc` (file named `.nofollowfinderrc` in the current directory)
+ * `~/.nofollowfinderrc` (file names `.nofollowfinderrc` in the home directory)
+ 
+This can be overridden by specifying the full path to a configuration file 
+using `--settings` or `-s` option.
+
+#### Supported values
+
+##### Default mode
+
+Does not read any values from the configuration file.
+
+##### Google mode
+
+`GOOGLE_API_KEY`
+
+`GOOGLE_API_CX`
+
+See below for how to obtain these values.
+
+#### Env overrides
+
+All values that are supported in configuration file are also supported directly
+over the environment.  
+
+
 #### Test
 
 Test that all is working well.
@@ -245,6 +284,80 @@ This will:
 Providing `-d` and `-l` options can redirect output and log to files just 
 like before. Any other combination from examples above can be used as well.
 
+
+### Google mode
+
+Specifying `--google` will run the tool in "Google mode". This has a few 
+differences compared to the regular mode. These are:
+
+ * URLs are obtained from Google search results
+ * Output CSV file has an additional column for "query" term
+ * Using `-i +` will use a default hard-coded set of query terms for Google search.
+ * It is necessary to specify `GOOGLE_API_KEY` and ``GOOGLE_API_CX` configuration
+   values in  order for the tool to be able to perform a search with Google.
+ * Optional `--count` option is available. It can be used to specify how many 
+   search results per query should get processed. Default it 10. Max is 100.
+   
+#### Obtaining the API keys from Google
+
+To perform searches with Google, this tool uses "Custom Search JSON API" feature:
+https://developers.google.com/custom-search/v1/overview
+
+##### Step 1 - create a Custom search instance
+
+The process is described here:
+https://developers.google.com/custom-search/docs/tutorial/creatingcse
+
+1. Open https://cse.google.com/create/new
+2. Enter `example.com` in the `Sites to search` box.
+3. Enter `nofollowfinder` in `Name of the search engine` box.
+4. Click `Create`.
+5. Click `Control panel` button next to `Modify your search engine`.
+6. Find `Sites to search` section and *delete* entry for `example.com`.
+7. Once that entry is deleted, find `Search the entire web` section immediately 
+   below, and turn on the toggle. 
+8. Scroll to the end of the page and click the `Update` button.
+9. Scroll up and find `Search engine ID`. Copy&paste the value for use later. 
+   This is the `GOOGLE_API_CX` we will need for the tool to run.
+   
+##### Step 2 - create an API key
+
+(continues from above)
+
+10. Find `Programmatic Access` section and click on `Get started` button next to
+    `Custom Search JSON API` (do *not* use `Restricted JSON API`)
+11. Click on the big blue `Get a key` button.
+12. Select `nofollowfinder` from the dropdown.
+13. Copy&paste the key for later use. 
+    This is the `GOOGLE_API_KEY` we will need for the tool to run.
+14. Click on the `API Console` link in the warning messages about the key not being restricted.
+15. Find `API restrictions` section.
+16. Select `Restrict key` option.
+17. From the dropdown, select `Custom Search API`.
+18. Click `Save`.
+
+#### Using the API keys
+The keys can be used in several equivalent ways.
+
+1. Inline when calling the script
+     * `GOOGLE_API_KEY="THE-KEY" GOOGLE_API_CX="THE-CX-VALUE" nofollow_finder --google ...`
+     * This is not very practical, but takes precedence over other ways of providing the keys
+
+2. Defined on the shell
+     * execute two commands:
+         * `export GOOGLE_API_KEY="THE-KEY"`
+         * `export GOOGLE_API_CX="THE-CX-VALUE"`
+         * after this, running `nofollow_finder --google ...` will see those keys as long as the shell is open
+         * ending the shell (e.g. closing the terminal window) will remove the key definitions
+
+3. Configuration file
+    * Recommended way, set up once permanently.
+    * Create a `.nofollowfinderrc` file in your home directory.
+        * This can be done with two commands like so:
+            * `echo GOOGLE_API_KEY="THE-KEY" > ~/.nofollowfinderrc`
+            * `echo GOOGLE_API_CX="THE-CX-VALUE" >> ~/.nofollowfinderrc`
+            * Note a single `>` in the first command and a double `>>` in the second.
+            
 
 ## Gotchas
 
