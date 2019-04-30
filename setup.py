@@ -1,7 +1,20 @@
 #!/usr/bin/env python
 # coding=utf-8
+import os
 
 from setuptools import setup
+
+
+def package_files(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join('..', path, filename))
+    return paths
+
+
+extra_files = package_files('nofollow_finder')
+
 
 setup(
     name='nofollow_finder',
@@ -13,6 +26,7 @@ setup(
     author_email='fran@changeset.hr',
     scripts=['bin/nofollow_finder'],
     packages=['nofollow_finder'],
+    package_data={'': extra_files},
     license='MIT',
     keywords='',
     install_requires=[
