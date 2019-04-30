@@ -21,6 +21,7 @@ setup(
         'lxml>=4.2.5,<4.3',
         'subprocess32>=3.5.3,<4',
         'python-dotenv>=0.10.1,<0.11',
+        'requests>=2.21.0,<2.22',
     ],
     extras_require={
         'dev': [
