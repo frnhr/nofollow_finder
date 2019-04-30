@@ -19,7 +19,7 @@ class CLITests(unittest.TestCase):
             'timeout': 60,
             'verbosity': 3,
             'mode': None,
-            'settings_file': False,
+            'settings_file': u'.nofollowfinderrc,~/.nofollowfinderrc',
         }
 
     @mock.patch('nofollow_finder.__main__.main')
