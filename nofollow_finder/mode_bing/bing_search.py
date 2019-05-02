@@ -9,7 +9,7 @@ from ..mode_web_search.web_search import WebSearch
 log = logging.getLogger(__name__)
 
 
-class GoogleSearch(WebSearch):
+class BingSearch(WebSearch):
     def __init__(self, api_key, cx):
         self.api_key = api_key
         self.cx = cx

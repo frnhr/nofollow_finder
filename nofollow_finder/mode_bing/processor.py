@@ -9,5 +9,5 @@ from __future__ import (
 from ..mode_web_search.processor import WebSearchProcessor
 
 
-class GoogleProcessor(WebSearchProcessor):
+class BingProcessor(WebSearchProcessor):
     pass
