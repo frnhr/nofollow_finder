@@ -81,6 +81,9 @@ class WebSearchInputCSV(InputCSV):
     def get_web_search(self):
         raise NotImplementedError()
 
+    def get_url(self, result):
+        raise NotImplementedError()
+
     def links_from_row(self, row):
         term = row[0]
         term = self.validate_search_term(term)
@@ -88,7 +91,7 @@ class WebSearchInputCSV(InputCSV):
             raise StopIteration()
         for result in self.web_search.get(term, self.count):
             yield {
-                'url': result['link'],
+                'url': self.get_url(result),
                 'query': term,
             }
 

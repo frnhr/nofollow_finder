@@ -65,6 +65,11 @@ from nofollow_finder.mode_google import (
     GoogleOutputCSV,
     GoogleProcessor,
 )
+from nofollow_finder.mode_bing import (
+    BingInputCSV,
+    BingOutputCSV,
+    BingProcessor,
+)
 from nofollow_finder.output_csv import OutputCSV
 from nofollow_finder.parser import Parser
 from nofollow_finder.processor import Processor
@@ -233,9 +238,9 @@ def main(in_file, domains, log_file, out_file, overwrite, header, verbosity,
         output_csv = GoogleOutputCSV(out_file, domains, overwrite, header)
         processor = GoogleProcessor(input_csv, downloader, parser, output_csv)
     elif 'bing' in modes:
-        input_csv = GoogleInputCSV(in_file, kwargs['count'])
-        output_csv = GoogleOutputCSV(out_file, domains, overwrite, header)
-        processor = GoogleProcessor(input_csv, downloader, parser, output_csv)
+        input_csv = BingInputCSV(in_file, kwargs['count'])
+        output_csv = BingOutputCSV(out_file, domains, overwrite, header)
+        processor = BingProcessor(input_csv, downloader, parser, output_csv)
     else:
         input_csv = InputCSV(in_file)
         output_csv = OutputCSV(out_file, domains, overwrite, header)

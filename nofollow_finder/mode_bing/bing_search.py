@@ -10,28 +10,38 @@ log = logging.getLogger(__name__)
 
 
 class BingSearch(WebSearch):
-    def __init__(self, api_key, cx):
+    def __init__(self, api_key):
         self.api_key = api_key
-        self.cx = cx
 
     def _query(self, term, num, offset):
         log.debug(u'_query for "{}", n={}, offset={}'.format(
             term, num, offset))
         query_params = urllib.urlencode({
-            'key': self.api_key,
-            'cx': self.cx,
             'q': term.encode('utf-8'),
-            'num': num,
-            'start': offset + 1,
+            'count': num,
+            'offset': offset,
+            'responseFilter': 'webpages',
         })
+        headers = {
+            'Ocp-Apim-Subscription-Key': self.api_key,
+        }
         data = requests.get(
-            'https://www.googleapis.com/customsearch/v1?{}'.format(
-                query_params)).json()
+            'https://api.cognitive.microsoft.com/bing/v7.0/search?{}'.format(
+                query_params),
+            headers=headers,
+        ).json()
         if data.get('error'):
-            log.error('Google API Error: {}'.format(data['error']))
+            log.error('Bing API Error: {}'.format(data['error']))
             return [], False
-        results = data.get('items', [])
-        has_next = bool(data['queries'].get('nextPage'))
+        results = data.get('webPages', {}).get('value', [])
+        try:
+            total_matches = data['webPages']['totalEstimatedMatches']
+        except KeyError:
+            log.warning('Failed to get totalEstimatedMatches')
+            has_next = False
+        else:
+            last_on_page = offset + len(results)
+            has_next = last_on_page < total_matches
         log.debug(u'results: len(results)={}, has_next={}'.format(
             len(results), has_next))
         return results, has_next

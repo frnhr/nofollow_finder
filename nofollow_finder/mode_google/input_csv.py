@@ -20,3 +20,6 @@ class GoogleInputCSV(WebSearchInputCSV):
 
     def get_web_search(self):
         return GoogleSearch(settings.GOOGLE_API_KEY, settings.GOOGLE_API_CX)
+
+    def get_url(self, result):
+        return result['link']

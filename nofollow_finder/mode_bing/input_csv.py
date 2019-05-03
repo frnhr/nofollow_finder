@@ -20,3 +20,6 @@ class BingInputCSV(WebSearchInputCSV):
 
     def get_web_search(self):
         return BingSearch(settings.BING_API_KEY)
+
+    def get_url(self, result):
+        return result['url']
