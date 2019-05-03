@@ -6,8 +6,8 @@ from __future__ import (
     unicode_literals,
 )
 
-from ..mode_web_search.processor import WebSearchProcessor
+from ..mode_web_search.output_csv import WebSearchOutputCSV
 
 
-class GoogleProcessor(WebSearchProcessor):
+class BingOutputCSV(WebSearchOutputCSV):
     pass

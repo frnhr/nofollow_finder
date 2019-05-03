@@ -1,4 +1,4 @@
-# nofollow_finder 1.3.2
+# nofollow_finder 1.4.0
 
 A tool that finds links with rel="nofollow" attribute on the web and 
 generates a CSV report.
@@ -285,9 +285,9 @@ Providing `-d` and `-l` options can redirect output and log to files just
 like before. Any other combination from examples above can be used as well.
 
 
-### Google mode
+### Google search mode
 
-Specifying `--google` will run the tool in "Google mode". This has a few 
+Specifying `-w google` will run the tool in "Google mode". This has a few 
 differences compared to the regular mode. These are:
 
  * URLs are obtained from Google search results
@@ -358,6 +358,28 @@ The keys can be used in several equivalent ways.
             * `echo GOOGLE_API_CX="THE-CX-VALUE" >> ~/.nofollowfinderrc`
             * Note a single `>` in the first command and a double `>>` in the second.
             
+
+### Bing search mode
+
+Similarly to "Google search mode", this mode uses Bing to search the web.
+It is activated by `-w bing` option.
+
+There is a single API key to get from 
+Save it in `BING_API_KEY` env variable.
+
+#### Obtaining the API key
+
+1. Open https://azure.microsoft.com/en-us/try/cognitive-services/ .
+2. Create an account and log in.
+3. Open https://azure.microsoft.com/en-us/try/cognitive-services/my-apis/ .
+4. Click "Show all" link.
+5. Find "Bing Search APIs v7" section and click "Add" button.
+6. Scroll down to "Key 1" and copy the value.
+
+#### Using the API key
+
+The key is used in `BING_API_KEY` environment variable. See Google mode section for details.
+
 
 ## Gotchas
 

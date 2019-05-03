@@ -18,7 +18,7 @@ class CLITests(unittest.TestCase):
             'redirect': True,
             'timeout': 60,
             'verbosity': 3,
-            'mode': None,
+            'modes': [],
             'settings_file': u'.nofollowfinderrc,~/.nofollowfinderrc',
         }
 
@@ -293,7 +293,7 @@ class TestMain(unittest.TestCase):
         main.main(
             'in_file.csv', ['example.com'], 'log_file.log', 'out_file.csv',
             overwrite=True, header=False, verbosity=3, redirect=True,
-            timeout=2, settings_file=False, mode=False,
+            timeout=2, settings_file=False, modes=[],
         )
         p_input.assert_called_once_with('in_file.csv')
         p_output.assert_called_once_with(
@@ -322,7 +322,7 @@ class TestMain(unittest.TestCase):
         main.main(
             'in_file.csv', ['example.com'], 'log_file.log', 'out_file.csv',
             overwrite=True, header=False, verbosity=4, redirect=True,
-            timeout=2, mode=None, settings_file=False,
+            timeout=2, modes=[], settings_file=False,
         )
         p_input.assert_called_once_with('in_file.csv')
         p_output.assert_called_once_with(

@@ -10,16 +10,16 @@ import logging
 
 from ..mode_web_search.input_csv import WebSearchInputCSV
 from ..settings import settings
-from .google_search import GoogleSearch
+from .bing_search import BingSearch
 
 
 log = logging.getLogger(__name__)
 
 
-class GoogleInputCSV(WebSearchInputCSV):
+class BingInputCSV(WebSearchInputCSV):
 
     def get_web_search(self):
-        return GoogleSearch(settings.GOOGLE_API_KEY, settings.GOOGLE_API_CX)
+        return BingSearch(settings.BING_API_KEY)
 
     def get_url(self, result):
-        return result['link']
+        return result['url']
