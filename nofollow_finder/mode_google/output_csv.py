@@ -6,9 +6,8 @@ from __future__ import (
     unicode_literals,
 )
 
-from ..output_csv import OutputCSV
+from ..mode_web_search.output_csv import WebSearchOutputCSV
 
 
-class GoogleOutputCSV(OutputCSV):
-    FIXED_HEADER = ('URL', 'query', 'HTTP response code',)
-    FIXED_COLS = 'url query http_response'
+class GoogleOutputCSV(WebSearchOutputCSV):
+    pass
