@@ -1,4 +1,4 @@
-# nofollow_finder 1.4.0
+# nofollow_finder 1.5.0
 
 A tool that finds links with rel="nofollow" attribute on the web and 
 generates a CSV report.
