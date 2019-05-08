@@ -10,5 +10,5 @@ from ..output_csv import OutputCSV
 
 
 class WebSearchOutputCSV(OutputCSV):
-    FIXED_HEADER = ('URL', 'query', 'HTTP response code',)
-    FIXED_COLS = 'url query http_response'
+    FIXED_HEADER = ('URL', 'query', 'engine', 'HTTP response code',)
+    FIXED_COLS = 'url query engine http_response'

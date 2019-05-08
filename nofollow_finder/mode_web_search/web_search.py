@@ -6,8 +6,12 @@ log = logging.getLogger(__name__)
 
 
 class WebSearch(object):
+    def __init__(self, settings, count):
+        self.settings = settings
+        self.count = count
 
-    def get(self, term, count=14):
+    def get(self, term):
+        count = self.count
         results, has_next = [], True
         for i in range(count):
             if i >= count:
@@ -17,7 +21,7 @@ class WebSearch(object):
                 results, has_next = self._try_query(term, num=10, offset=i)
             if not results:
                 raise StopIteration()
-            yield results.pop(0)
+            yield self._get_url(results.pop(0))
 
     def _try_query(self, term, num, offset):
         if not isinstance(term, unicode):
@@ -29,4 +33,7 @@ class WebSearch(object):
             return [], False
 
     def _query(self, term, num, offset):
+        raise NotImplementedError()
+
+    def _get_url(self, result):
         raise NotImplementedError()

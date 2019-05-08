@@ -9,6 +9,9 @@ from __future__ import (
 import logging
 from tempfile import NamedTemporaryFile
 
+from nofollow_finder.mode_web_search.search_bing import BingSearch
+from nofollow_finder.mode_web_search.search_google import GoogleSearch
+from nofollow_finder.settings import settings
 from ..input_csv import InputCSV
 
 
@@ -65,12 +68,22 @@ girl wash your face study guide
 '''.strip()
 
 
+SEARCH_ENGINES = {
+    'google': GoogleSearch,
+    'bing': BingSearch,
+}
+
+
 class WebSearchInputCSV(InputCSV):
     MIN_TERM_LEN = 3
 
-    def __init__(self, in_file, count):
-        self.count = count
-        self.web_search = self.get_web_search()
+    def __init__(self, in_file, search_engines=(), counts=()):
+        self.search_engines = (
+            SEARCH_ENGINES[engine](settings, count)
+            for engine, count in zip(search_engines, counts)
+        )
+        self.counts = counts
+
         if in_file == '+':
             tmp = NamedTemporaryFile('w+', delete=False)
             tmp.write(HARDCODED_DEFAULTS)
@@ -78,21 +91,21 @@ class WebSearchInputCSV(InputCSV):
             tmp.close
         super(WebSearchInputCSV, self).__init__(in_file)
 
-    def get_web_search(self):
-        raise NotImplementedError()
-
-    def get_url(self, result):
-        raise NotImplementedError()
+    def web_search(self, term):
+        for search_engine in self.search_engines:
+            for url in search_engine.get(term):
+                yield url, search_engine.slug
 
     def links_from_row(self, row):
         term = row[0]
         term = self.validate_search_term(term)
         if not term:
             raise StopIteration()
-        for result in self.web_search.get(term, self.count):
+        for url, engine in self.web_search(term):
             yield {
-                'url': self.get_url(result),
+                'url': url,
                 'query': term,
+                'engine': engine,
             }
 
     def validate_search_term(self, term):

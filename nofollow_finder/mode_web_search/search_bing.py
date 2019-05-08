@@ -10,8 +10,7 @@ log = logging.getLogger(__name__)
 
 
 class BingSearch(WebSearch):
-    def __init__(self, api_key):
-        self.api_key = api_key
+    slug = 'bing'
 
     def _query(self, term, num, offset):
         log.debug(u'_query for "{}", n={}, offset={}'.format(
@@ -45,3 +44,10 @@ class BingSearch(WebSearch):
         log.debug(u'results: len(results)={}, has_next={}'.format(
             len(results), has_next))
         return results, has_next
+
+    @property
+    def api_key(self):
+        return self.settings.BING_API_KEY
+
+    def _get_url(self, result):
+        return result['url']
