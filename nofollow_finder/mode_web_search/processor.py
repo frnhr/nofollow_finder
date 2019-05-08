@@ -21,5 +21,6 @@ class WebSearchProcessor(Processor):
             domains=self.domains,
             url=link['url'],
             query=link['query'],
+            engine=link['engine'],
             http_response=0,
         )

@@ -157,11 +157,13 @@ using `--settings` or `-s` option.
 
 Does not read any values from the configuration file.
 
-##### Google mode
+##### Search mode
 
 `GOOGLE_API_KEY`
 
 `GOOGLE_API_CX`
+
+`BING_API_KEY`
 
 See below for how to obtain these values.
 
@@ -285,19 +287,29 @@ Providing `-d` and `-l` options can redirect output and log to files just
 like before. Any other combination from examples above can be used as well.
 
 
-### Google search mode
+### Web Search Mode
 
-Specifying `-w google` will run the tool in "Google mode". This has a few 
+Using `-w google` option will run the tool in "Web Search Mode" using Google 
+as the search engine.  Using `-w bing` will use Bing instead. It is possible 
+to use both: `-w google -w bing`.
+
+Web Search Mode has a few 
 differences compared to the regular mode. These are:
 
- * URLs are obtained from Google search results
- * Output CSV file has an additional column for "query" term
+ * URLs are obtained from a web search engine
+ * Output CSV file has two additional columns:
+    * "query" column, contains the search term
+    * "engine" column, contains the name of search engine used
  * Using `-i +` will use a default hard-coded set of query terms for Google search.
- * It is necessary to specify `GOOGLE_API_KEY` and ``GOOGLE_API_CX` configuration
-   values in  order for the tool to be able to perform a search with Google.
+ * It is necessary to specify API keys for the search engine(s)
+    * `GOOGLE_API_KEY` and `GOOGLE_API_CX` for Google
+    * `BING_API_KEY` for Bing
  * Optional `--count` option is available. It can be used to specify how many 
-   search results per query should get processed. Default it 10. Max is 100.
-   
+   search results per query should get processed. Default it 100 for Google 
+   and 500 for Bing. When specifying the count option with more then one 
+   search engine, it needs to be specified for each engine, e.g:
+   `-w gogole -c 50 -w bing -c 200`.
+
 #### Obtaining the API keys from Google
 
 To perform searches with Google, this tool uses "Custom Search JSON API" feature:
@@ -340,14 +352,14 @@ https://developers.google.com/custom-search/docs/tutorial/creatingcse
 The keys can be used in several equivalent ways.
 
 1. Inline when calling the script
-     * `GOOGLE_API_KEY="THE-KEY" GOOGLE_API_CX="THE-CX-VALUE" nofollow_finder --google ...`
+     * `GOOGLE_API_KEY="THE-KEY" GOOGLE_API_CX="THE-CX-VALUE" nofollow_finder -w google ...`
      * This is not very practical, but takes precedence over other ways of providing the keys
 
 2. Defined on the shell
      * execute two commands:
          * `export GOOGLE_API_KEY="THE-KEY"`
          * `export GOOGLE_API_CX="THE-CX-VALUE"`
-         * after this, running `nofollow_finder --google ...` will see those keys as long as the shell is open
+         * after this, running `nofollow_finder -w google ...` will see those keys as long as the shell is open
          * ending the shell (e.g. closing the terminal window) will remove the key definitions
 
 3. Configuration file
@@ -357,17 +369,8 @@ The keys can be used in several equivalent ways.
             * `echo GOOGLE_API_KEY="THE-KEY" > ~/.nofollowfinderrc`
             * `echo GOOGLE_API_CX="THE-CX-VALUE" >> ~/.nofollowfinderrc`
             * Note a single `>` in the first command and a double `>>` in the second.
-            
 
-### Bing search mode
-
-Similarly to "Google search mode", this mode uses Bing to search the web.
-It is activated by `-w bing` option.
-
-There is a single API key to get from 
-Save it in `BING_API_KEY` env variable.
-
-#### Obtaining the API key
+#### Obtaining the API key from Bing
 
 1. Open https://azure.microsoft.com/en-us/try/cognitive-services/ .
 2. Create an account and log in.
@@ -376,9 +379,9 @@ Save it in `BING_API_KEY` env variable.
 5. Find "Bing Search APIs v7" section and click "Add" button.
 6. Scroll down to "Key 1" and copy the value.
 
-#### Using the API key
+#### Using the API key for Bing
 
-The key is used in `BING_API_KEY` environment variable. See Google mode section for details.
+The key is used in `BING_API_KEY` environment variable. See Web Search Mode section for details.
 
 
 ## Gotchas

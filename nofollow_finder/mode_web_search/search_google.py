@@ -10,16 +10,14 @@ log = logging.getLogger(__name__)
 
 
 class GoogleSearch(WebSearch):
-    def __init__(self, api_key, cx):
-        self.api_key = api_key
-        self.cx = cx
+    slug = 'google'
 
     def _query(self, term, num, offset):
         log.debug(u'_query for "{}", n={}, offset={}'.format(
             term, num, offset))
         query_params = urllib.urlencode({
             'key': self.api_key,
-            'cx': self.cx,
+            'cx': self.api_cx,
             'q': term.encode('utf-8'),
             'num': num,
             'start': offset + 1,
@@ -35,3 +33,14 @@ class GoogleSearch(WebSearch):
         log.debug(u'results: len(results)={}, has_next={}'.format(
             len(results), has_next))
         return results, has_next
+
+    @property
+    def api_key(self):
+        return self.settings.GOOGLE_API_KEY
+
+    @property
+    def api_cx(self):
+        return self.settings.GOOGLE_API_CX
+
+    def _get_url(self, result):
+        return result['link']

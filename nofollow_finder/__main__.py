@@ -8,7 +8,7 @@ Usage:
   nofollow_finder -d <domains> [options]
   nofollow_finder [-i <input_csv>] -d <domains> [-o <out_file> [-a | -f]] \
 [options]
-  nofollow_finder (-w <engine>)... [-c <count>] [-i <input_csv>] \
+  nofollow_finder (-w <engine> [-c <count>])... [-i <input_csv>] \
 -d <domains> [-o <out_file> [-a | -f]] [options]
   nofollow_finder test
   nofollow_finder (-v | --version)
@@ -23,8 +23,8 @@ Options:
                           input file will be treated as query terms.
                           <engine> can be one of: google, bing.
                           This option can be specified multiple times.
-  -c --count=<count>      Each term will be searched for on the web, and top
-                          <count> results will be processed. [default: {COUNT}]
+  -c --count=<count>      How many results to fetch from a search engine.
+                          Defaults: Google: {COUNT_GOOGLE}, Bing: {COUNT_BING}
   -d --domains=<domains>  List of domains, separated by commas. Required.
   -o --out=<out_file>     Output CSV file. Default: stdout.
   -a --append             Append to existing CSV file.
@@ -60,16 +60,9 @@ import docopt
 
 from nofollow_finder.downloader import Downloader
 from nofollow_finder.input_csv import InputCSV
-from nofollow_finder.mode_google import (
-    GoogleInputCSV,
-    GoogleOutputCSV,
-    GoogleProcessor,
-)
-from nofollow_finder.mode_bing import (
-    BingInputCSV,
-    BingOutputCSV,
-    BingProcessor,
-)
+from nofollow_finder.mode_web_search.input_csv import WebSearchInputCSV
+from nofollow_finder.mode_web_search.output_csv import WebSearchOutputCSV
+from nofollow_finder.mode_web_search.processor import WebSearchProcessor
 from nofollow_finder.output_csv import OutputCSV
 from nofollow_finder.parser import Parser
 from nofollow_finder.processor import Processor
@@ -79,21 +72,25 @@ _minutes_ = 60
 
 MAX_TIMEOUT = 5 * _minutes_
 DEFAULT_LOFG = 'nofollow_finder.log'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 VERSION = tuple(__version__.split('.'))
-DEFAULT_COUNT = 12
+DEFAULT_COUNTS = {
+    'google': 100,
+    'bing': 500,
+}
 
 __doc__ = __doc__.format(
     version=__version__,
     m=MAX_TIMEOUT,
     default_log=DEFAULT_LOFG,
-    COUNT=DEFAULT_COUNT,
+    COUNT_GOOGLE=DEFAULT_COUNTS['google'],
+    COUNT_BING=DEFAULT_COUNTS['bing'],
 )
 
 log = logging.getLogger(__name__)
 
 LOG_FORMAT = (
-    '%(levelname)-8s  %(asctime)s  %(process)-5d  %(name)-43s  %(message)s')
+    '%(levelname)-8s  %(asctime)s  %(process)-5d  %(name)-45s  %(message)s')
 
 
 def _configure_log(log_file, verbosity):
@@ -212,10 +209,21 @@ def validate_modes(args_):
 
 
 def validate_kwargs(args_):
-    if validate_modes(args_):
-        return {
-            'count': int(args_['--count'] or DEFAULT_COUNT),
-        }
+    modes = validate_modes(args_)
+    if modes:
+        try:
+            counts = list(map(int, args_['--count']))
+            if not counts:
+                counts = [DEFAULT_COUNTS[mode] for mode in modes]
+            if len(counts) != len(modes):
+                raise docopt.DocoptExit(
+                    'Option "-c" must be specified for every "-w".')
+            return {
+                'count': counts,
+            }
+        except Exception as e:
+            raise docopt.DocoptExit(
+                'Unexpected error with "-c" option: {}'.format(e))
     return {}
 
 
@@ -233,14 +241,13 @@ def main(in_file, domains, log_file, out_file, overwrite, header, verbosity,
 
     downloader = Downloader(follow_redirects=redirect, timeout=timeout)
     parser = Parser(domains)
-    if 'google' in modes:
-        input_csv = GoogleInputCSV(in_file, kwargs['count'])
-        output_csv = GoogleOutputCSV(out_file, domains, overwrite, header)
-        processor = GoogleProcessor(input_csv, downloader, parser, output_csv)
-    elif 'bing' in modes:
-        input_csv = BingInputCSV(in_file, kwargs['count'])
-        output_csv = BingOutputCSV(out_file, domains, overwrite, header)
-        processor = BingProcessor(input_csv, downloader, parser, output_csv)
+    if modes:
+        counts = kwargs['count']
+    if modes:
+        input_csv = WebSearchInputCSV(in_file, modes, counts)
+        output_csv = WebSearchOutputCSV(out_file, domains, overwrite, header)
+        processor = WebSearchProcessor(
+            input_csv, downloader, parser, output_csv)
     else:
         input_csv = InputCSV(in_file)
         output_csv = OutputCSV(out_file, domains, overwrite, header)
